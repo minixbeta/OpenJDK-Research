@@ -43,3 +43,13 @@ create D:\JavaSE1.8 (注: create对应当前目当下的create.bat文件)<br>
 
 在Visual Studio 2010中打开jvm\share\vm\runtime\thread.cpp文件，
 在create_vm方法中(3269行)打个断点，然后按F5就可以了。
+
+观察调用堆栈，你会发现自己找不到 main 函数，第一个可以找到的函数是  	
+
+```
+jvm.dll!JNI_CreateJavaVM(JavaVM_ * * vm, void * * penv, void * args) 
+```
+
+调用它的是 `java.exe!00xxxxxx`
+
+观察一下项目属性->配置属性->调试，会发现命令处是 `java.exe` 的路径，命令参数是 `-XXaltjvm=$(TargetDir)  -Dsun.java.launcher=gamma`，结合上面的调用堆栈，可以明白，我们用 Visual Studio 编译出的是 `jvm.dll`，运行时，是运行 `java.exe`，它加载我们编译出的 `jvm.dll` 并运行。由于我们并没有编译 `java.exe` 的源代码，所以看不到 `main` 函数，只能看到运行的时候 `jvm.dll` 中的代码。
